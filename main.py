@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 import os
 
+from database.database import get_data
+
 
 app = FastAPI()
 
@@ -120,3 +122,28 @@ def get_directory(path: str, files_processed: str):
             return 'Дириктория уже обработана', False
     return 'Дириктория не обработана', True 
 
+
+@app.get("/database/")
+def info_database():
+    '''
+    GET функция: Возвращает информацию о базе данных.
+    Returns: 
+        Строка с информацией о базе данных. (до писать)
+    '''
+    return 'информация о базе данных'
+
+
+@app.get("/database/get/{count}")
+def get_data_database(count=5):
+    '''
+    GET функция: Возвращает строки из базы данных, в количестве, указанном параметром count.
+    Returns 
+        count, int: Количество строк для извлечения из базы данных. Значение по умолчанию: 5.
+
+    Return: 
+        list: Список строк из базы данных, соответствующих заданному количеству.
+    '''
+    if int(count)<= 0:
+        return 'отрицательное количество '
+    data = get_data(count)
+    return data
