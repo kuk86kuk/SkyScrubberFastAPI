@@ -7,7 +7,7 @@ from database.database import get_data
 app = FastAPI()
 
 
-@app.get("/checks_all_directories/{name_directories}/{files_processed}")
+@app.get("/checks_directories_all/{name_directories}/{files_processed}")
 def read_files_directories_processing(files_processed, name_directories):
     '''
     GET функция: Эта функция проверяет, массив директория на наличие обработаных дириктории нейронной сетью.
@@ -123,7 +123,7 @@ def get_directory(path: str, files_processed: str):
     return 'Дириктория не обработана', True 
 
 
-@app.get("/database/")
+@app.get("/database/info")
 def info_database():
     '''
     GET функция: Возвращает информацию о базе данных.
@@ -133,8 +133,8 @@ def info_database():
     return 'информация о базе данных'
 
 
-@app.get("/database/get/{count}")
-def get_data_database(count=5):
+@app.get("/database/get/{table}/{count}")
+def get_data_database(table, count=5):
     '''
     GET функция: Возвращает строки из базы данных, в количестве, указанном параметром count.
     Returns 
@@ -143,8 +143,23 @@ def get_data_database(count=5):
     Return: 
         list: Список строк из базы данных, соответствующих заданному количеству.
     '''
-    if int(count)<= 0:
-        return 'отрицательное количество '
     data = get_data(count)
     return data
 
+
+@app.delete("/database/delete/{table}/{id}")
+def delete_data_database(table, id):
+    pass
+
+
+@app.post('/processing_directory_all/{path_to_directories}/{file_processed}')
+def send_for_processing_directory_all(path_to_directories, file_processed):
+    path = replace_underscore_with_slash(path_to_directories)
+    if not checks_exists_directories(path):
+        return f'Путь не верен или директории не существует {path}  проверьте корректность вода'
+
+@app.post('/processing_directory/{path_to_directory}/{file_processed}')
+def send_for_processing_directory(path_to_directory, file_processed):
+    path = replace_underscore_with_slash(path_to_directory)
+    if not checks_exists_directories(path):
+        return f'Путь не верен или директории не существует {path}  проверьте корректность вода'
