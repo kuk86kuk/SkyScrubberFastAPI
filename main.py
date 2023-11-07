@@ -7,7 +7,7 @@ from database.database import get_data
 app = FastAPI()
 
 
-@app.get("/checks_all_directories/{name_directories}/{files_processed}")
+@app.get("/checks_directories_all/{name_directories}/{files_processed}")
 def read_files_directories_processing(files_processed, name_directories):
     '''
     GET функция: Эта функция проверяет, массив директория на наличие обработаных дириктории нейронной сетью.
@@ -123,28 +123,101 @@ def get_directory(path: str, files_processed: str):
     return 'Дириктория не обработана', True 
 
 
-@app.get("/database/")
+@app.get("/database/info")
 def info_database():
     '''
     GET функция: Возвращает информацию о базе данных.
     Returns: 
-        Строка с информацией о базе данных. (до писать)
+        Строка с информацией о базе данных. методы и так далее (до писать)
     '''
-    return 'информация о базе данных'
+    pass
 
 
-@app.get("/database/get/{count}")
-def get_data_database(count=5):
+@app.get("/database/get/{table}/{count}")
+def get_data_database(table, count=5):
     '''
     GET функция: Возвращает строки из базы данных, в количестве, указанном параметром count.
-    Returns 
+    Args 
         count, int: Количество строк для извлечения из базы данных. Значение по умолчанию: 5.
 
     Return: 
         list: Список строк из базы данных, соответствующих заданному количеству.
     '''
-    if int(count)<= 0:
-        return 'отрицательное количество '
-    data = get_data(count)
-    return data
+    pass
 
+
+@app.delete("/database/delete/{table}/{id}")
+def delete_data_database(table, id):
+    '''
+    DELETE Функция: Удаляет строку из базы данных на основе указанной таблицы и идентификатора (ID).
+    Args:
+        table: Наименование таблицы, из которой нужно удалить строку.
+        id: Идентификатор (ID) строки, которую необходимо удалить.
+
+    Return: 
+        Возвращает результат; 200 OK
+    '''
+    pass
+
+
+@app.put("/database/put/{table}/{id}/{data}")
+def put_data_database(table, id, data):
+    '''
+    PUT Функция: Обновляет строку в определенной таблице базы данных на основе указанного идентификатора (ID).
+    Args:
+        table: Наименование таблицы, в которой нужно обновить строку.
+        id: Идентификатор (ID) строки, которую необходимо обновить.
+        data: Новые данные, которыми нужно обновить строку.
+    Return: 
+        Возвращает результат; 200 OK
+    '''
+    pass
+
+
+@app.post("/database/post/{table}/{data}")
+def delete_data_database(table, data):
+    '''
+    POST Функция: Добавляет новую строку в указанную таблицу базы данных.
+    Args:
+        table: Наименование таблицы, в которую нужно добавить новую строку.
+        data: Данные, которые необходимо добавить в виде строки или записи.
+    Return: 
+        Возвращает результат; 200 OK
+    '''
+    pass
+
+
+@app.post('/processing_directory_all/{path_to_directories}/{file_processed}/{data}')
+def send_for_processing_directory_all(path_to_directories, file_processed, data):
+    path = replace_underscore_with_slash(path_to_directories)
+    if not checks_exists_directories(path):
+        return f'Путь не верен или директории не существует {path}  проверьте корректность вода'
+
+
+@app.post('/processing_directory/{path_to_directory}/{file_processed}/{data}')
+def send_for_processing_directory(path_to_directory, file_processed, data):
+    '''
+    GET Функция: Функция отправляет директорий на обработку нейросетью.
+    Args:
+        path_to_directory: Путь к директории, которую необходимо отправить на обработку.
+        file_processed: Имя файла, который будет использоваться для обработки данных в директории.
+         data: Данные или параметры, необходимые для процесса обработки.
+    Return: 
+        Возвращает результат; 200 OK
+    '''
+    path = replace_underscore_with_slash(path_to_directory)
+    if not checks_exists_directories(path):
+        return f'Путь не верен или директории не существует {path}  проверьте корректность вода'
+    
+
+@app.post('/processing_file/{name_file}/{data}')
+def processing_file(name_file, data):
+    '''
+    GET Функция: Функция отправляет файл на обработку нейросетью.
+    Args:
+        file_processed: Имя файла, который будет использоваться для обработки данных в директории.
+        data: Данные или параметры, необходимые для процесса обработки.
+    Return: 
+        Возвращает результат; 200 OK
+    '''
+    pass

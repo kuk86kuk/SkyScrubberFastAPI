@@ -21,7 +21,7 @@ SkyScrubberFastAPI представляет собой [краткое опис�
    
    ```bash
    https git clone https://github.com/kuk86kuk/SkyScrubberFastAPI.git
-   ssh git clone git@github.com:kuk86kuk/SkyScrubberFastAPI.git
+   ssh   git clone git@github.com:kuk86kuk/SkyScrubberFastAPI.git
 
 2. Запуск
 Перейдите в директорию проекта:
