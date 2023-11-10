@@ -1,14 +1,14 @@
 from fastapi import FastAPI
 import os
 
-from database.database import get_data
+
 
 
 app = FastAPI()
 
 
 @app.get("/checks_directories_all/{name_directories}/{files_processed}")
-def read_files_directories_processing(files_processed, name_directories):
+async def read_files_directories_processing(files_processed, name_directories):
     '''
     GET функция: Эта функция проверяет, массив директория на наличие обработаных дириктории нейронной сетью.
     Args 
@@ -27,7 +27,7 @@ def read_files_directories_processing(files_processed, name_directories):
     return {path: directories, "обработаные": processed, "не": not_processed }
 
 
-def get_all_directories(path: str):
+async def get_all_directories(path: str):
     '''
     Получает всеx дириктории по выбранному пути.
     Return directories_all: list, path: str
@@ -36,7 +36,7 @@ def get_all_directories(path: str):
     return directories_all, path
 
 
-def checks_processed_directories(directories: list, path: str, files_processed: str):
+async def checks_processed_directories(directories: list, path: str, files_processed: str):
     '''
     Функция проверяет выбранные директории на наличие файлов, обработанных нейронной сетью.
     Args:
@@ -62,7 +62,7 @@ def checks_processed_directories(directories: list, path: str, files_processed: 
     return processed, not_processed
 
 
-def replace_underscore_with_slash(string):
+async def replace_underscore_with_slash(string):
     '''
     Заменяет все вхождения символа "_" на "/", и добавляет "/" в конец строки.
     Args:
@@ -74,7 +74,7 @@ def replace_underscore_with_slash(string):
     return result_string + '/' # Добавляем символ "/" в конец строки
 
 
-def checks_exists_directories(path: str):
+async def checks_exists_directories(path: str):
     '''
     Проверяет существование директории по указанному пути.
     Args:
@@ -86,7 +86,7 @@ def checks_exists_directories(path: str):
 
 
 @app.get("/checks_directory/{name_directories}/{files_processed}")
-def read_files_directory_processing(files_processed, name_directories):
+async def read_files_directory_processing(files_processed, name_directories):
     '''
     GET функция: Эта функция проверяет, была ли выбранная директория обработана нейронной сетью.
     Args 
@@ -104,7 +104,7 @@ def read_files_directory_processing(files_processed, name_directories):
     return get_directory(path, files_processed)
 
 
-def get_directory(path: str, files_processed: str):
+async def get_directory(path: str, files_processed: str):
     '''
     Проверяет наличие папки в указанном пути.
     Args:
@@ -124,7 +124,7 @@ def get_directory(path: str, files_processed: str):
 
 
 @app.get("/database/info")
-def info_database():
+async def info_database():
     '''
     GET функция: Возвращает информацию о базе данных.
     Returns: 
@@ -134,7 +134,7 @@ def info_database():
 
 
 @app.get("/database/get/{table}/{count}")
-def get_data_database(table, count=5):
+async def get_data_database(table, count=5):
     '''
     GET функция: Возвращает строки из базы данных, в количестве, указанном параметром count.
     Args 
@@ -147,7 +147,7 @@ def get_data_database(table, count=5):
 
 
 @app.delete("/database/delete/{table}/{id}")
-def delete_data_database(table, id):
+async def delete_data_database(table, id):
     '''
     DELETE Функция: Удаляет строку из базы данных на основе указанной таблицы и идентификатора (ID).
     Args:
@@ -161,7 +161,7 @@ def delete_data_database(table, id):
 
 
 @app.put("/database/put/{table}/{id}/{data}")
-def put_data_database(table, id, data):
+async def put_data_database(table, id, data):
     '''
     PUT Функция: Обновляет строку в определенной таблице базы данных на основе указанного идентификатора (ID).
     Args:
@@ -175,7 +175,7 @@ def put_data_database(table, id, data):
 
 
 @app.post("/database/post/{table}/{data}")
-def delete_data_database(table, data):
+async def delete_data_database(table, data):
     '''
     POST Функция: Добавляет новую строку в указанную таблицу базы данных.
     Args:
@@ -188,14 +188,14 @@ def delete_data_database(table, data):
 
 
 @app.post('/processing_directory_all/{path_to_directories}/{file_processed}/{data}')
-def send_for_processing_directory_all(path_to_directories, file_processed, data):
+async def send_for_processing_directory_all(path_to_directories, file_processed, data):
     path = replace_underscore_with_slash(path_to_directories)
     if not checks_exists_directories(path):
         return f'Путь не верен или директории не существует {path}  проверьте корректность вода'
 
 
 @app.post('/processing_directory/{path_to_directory}/{file_processed}/{data}')
-def send_for_processing_directory(path_to_directory, file_processed, data):
+async def send_for_processing_directory(path_to_directory, file_processed, data):
     '''
     GET Функция: Функция отправляет директорий на обработку нейросетью.
     Args:
@@ -211,7 +211,7 @@ def send_for_processing_directory(path_to_directory, file_processed, data):
     
 
 @app.post('/processing_file/{name_file}/{data}')
-def processing_file(name_file, data):
+async def processing_file(name_file, data):
     '''
     GET Функция: Функция отправляет файл на обработку нейросетью.
     Args:
