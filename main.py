@@ -1,6 +1,6 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 import os
-import json
+
 
 
 app = FastAPI()
@@ -120,40 +120,4 @@ def get_directory(path: str, files_processed: str):
         if df == files_processed:
             return 'Дириктория уже обработана', False
     return 'Дириктория не обработана', True
-
-@app.post("/process_directory")
-def process_directory(directory_path: str):
-    '''
-    POST-функция: Обрабатывает каталог, проверяет его существование и возвращает JSON-файл.
-    Args:
-        directory_path (str): Путь к обрабатываемому каталогу.
-
-    Возвращает:
-        dict: JSON-файл, содержащий информацию об обработанном каталоге.
-    '''
-    # Замена подчеркивания на косую черту и добавление косой черты в конце пути
-    path = replace_underscore_with_slash(directory_path)
-
-    # Проверяем, существует ли каталог
-    if not checks_exists_directories(path):
-        raise HTTPException(status_code=404, detail=f'Directory does not exist: {directory_path}')
-
-    # Ваша логика обработки здесь...
-    # Для примера создадим образец содержимого JSON-файла
-    json_content = {
-        "directory_path": directory_path,
-        "status": "Обработка завершена успешно",
-        "files_processed": ["file1.txt", "file2.txt"],
-        "additional_info": { "key": "value"}
-    }
-
-    # Сохранить JSON-содержимое в файл (имя файла можно настроить по своему усмотрению)
-    output_filename = "output.json"
-    output_path = os.path.join(path, output_filename)
-
-    with open(output_path, 'w') as json_file:
-        json.dump(json_content, json_file)
-
-    # Возвращает путь к JSON-файлу или содержимое по мере необходимости
-    return {"message": "Обработка завершена", "json_file_path": output_path} 
 
