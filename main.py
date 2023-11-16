@@ -27,7 +27,8 @@ async def read_files_directories_processing(files_processed, name_directories):
 async def get_all_directories(path: str):
     '''
     Получает всеx дириктории по выбранному пути.
-    Return directories_all: list, path: str
+    Return: 
+        directories_all: list, path: str
     '''
     directories_all = [f for f in os.listdir(path)]
     return directories_all, path
