@@ -2,6 +2,8 @@ import os
 from fastapi import FastAPI, Depends
 
 
+
+
 app = FastAPI()
 
 @app.get("/checks_directories_all/{name_directories}/{files_processed}")
@@ -117,7 +119,7 @@ async def get_directory(path: str, files_processed: str):
     for df in directory_files:
         if df == files_processed:
             return 'Дириктория уже обработана', False
-    return 'Дириктория не обработана', True 
+    return 'Дириктория не обработана', True
 
 
 @app.get("/database/info")
