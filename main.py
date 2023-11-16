@@ -1,30 +1,8 @@
 import os
 from fastapi import FastAPI, Depends
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
-from app.models.task_model import TaskCreate, TaskDB
 
-from app.models.database import get_database
 
 app = FastAPI()
-
-# Подключение к MongoDB
-mongodb_uri = "mongodb://localhost:27017"
-client = AsyncIOMotorClient(mongodb_uri)
-db = client.get_database()
-
-@app.post("/create_task/", response_model=TaskDB)
-async def create_task(task: TaskCreate, db: AsyncIOMotorDatabase = Depends(get_database)):
-    task_data = task.dict()
-    collection = db.tasks
-    result = await collection.insert_one(task_data)
-    task_data["_id"] = result.inserted_id
-    return TaskDB(**task_data)
-
-@app.get("/get_tasks/", response_model=list[TaskDB])
-async def get_tasks(db: AsyncIOMotorDatabase = Depends(get_database)):
-    collection = db.tasks
-    tasks = await collection.find().to_list(length=10)
-    return tasks
 
 @app.get("/checks_directories_all/{name_directories}/{files_processed}")
 async def read_files_directories_processing(files_processed, name_directories):
