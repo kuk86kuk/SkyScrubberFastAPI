@@ -1,6 +1,7 @@
 import datetime
 
 
+
 def logs(docs, tag_id):
     json = {
         "id": docs,

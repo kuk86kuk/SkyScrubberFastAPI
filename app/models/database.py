@@ -1,10 +1,11 @@
-from settings.settings import SETTINGSDB
-import asyncio
-from task_model import document1
-
+from .settings.settingsDB import SettingsDB
 
 
 class DatabaseManager(): 
+    def __init__(self) -> None:
+        self.SETTINGSDB = SettingsDB()
+
+
     def do_insert_in_db(self, json):
         '''
         Cтатический метод, который встовляет выбранный json в базу данных
@@ -14,8 +15,8 @@ class DatabaseManager():
         Return: 
             pass (дописать)
         '''
-        SETTINGSDB.DB.test.insert_one(json)
-        SETTINGSDB.CLIENT.get_io_loop()
+        self.SETTINGSDB.DB.test.insert_one(json)
+        self.SETTINGSDB.CLIENT.get_io_loop()
         return 200
     
     
@@ -28,8 +29,8 @@ class DatabaseManager():
         Return: 
             pass (дописать)
         '''
-        SETTINGSDB.DB.test.insert_many(arr_json)
-        SETTINGSDB.CLIENT.get_io_loop()
+        self.SETTINGSDB.DB.test.insert_many(arr_json)
+        self.SETTINGSDB.CLIENT.get_io_loop()
         return 200
     
 
@@ -44,7 +45,6 @@ class DatabaseManager():
         '''
         pass
     
-
     
     def remove_lines_arr_db(self, db, arr_id):
         '''
@@ -95,7 +95,3 @@ class DatabaseManager():
         '''
         return json
 
-
-DBM = DatabaseManager()
-docu = document1(1, 'сделал тото')
-DBM.do_insert_in_db(docu)

@@ -17,5 +17,6 @@ class SettingsDB():
         self.COLLECTION = self.DB[name_db]
 
 
-SETTINGSDB = SettingsDB()
+if __name__ == "__main__":
+    pass
 
