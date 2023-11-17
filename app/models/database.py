@@ -1,10 +1,11 @@
 from settings.settings import SETTINGSDB
 import asyncio
+from task_model import document1
 
-class DatabaseManager():
 
-    @staticmethod
-    def do_insert_in_db(db, json):
+
+class DatabaseManager(): 
+    def do_insert_in_db(self, json):
         '''
         Cтатический метод, который встовляет выбранный json в базу данных
         Args:
@@ -13,12 +14,12 @@ class DatabaseManager():
         Return: 
             pass (дописать)
         '''
-        instance = DatabaseManager()
-        pass
+        SETTINGSDB.DB.test.insert_one(json)
+        SETTINGSDB.CLIENT.get_io_loop()
+        return 200
     
-
-    @staticmethod
-    def do_insert_arr_in_db(db, arr_json):
+    
+    def do_insert_arr_in_db(self, arr_json):
         '''
         Cтатический метод, который встовляет массив json в базу данных
         Args:
@@ -27,12 +28,12 @@ class DatabaseManager():
         Return: 
             pass (дописать)
         '''
-        instance = DatabaseManager()
-        pass
+        SETTINGSDB.DB.test.insert_many(arr_json)
+        SETTINGSDB.CLIENT.get_io_loop()
+        return 200
     
 
-    @staticmethod
-    def remove_line_db(db, id):
+    def remove_line_db(self, db, id):
         '''
         Cтатический метод, который удаляет json по выбраному id
         Args:
@@ -41,12 +42,11 @@ class DatabaseManager():
         Return: 
             pass (дописать)
         '''
-        instance = DatabaseManager()
         pass
     
 
-    @staticmethod
-    def remove_lines_arr_db(db, arr_id):
+    
+    def remove_lines_arr_db(self, db, arr_id):
         '''
         Cтатический метод, который удаляет массив json по выбраномым id
         Args:
@@ -55,12 +55,10 @@ class DatabaseManager():
         Return: 
             pass (дописать)
         '''
-        instance = DatabaseManager()
         pass
 
 
-    @staticmethod
-    def put_line_db(db, id, json):
+    def put_line_db(self, db, id, json):
         '''
         Cтатический метод, который изменяет json по выбраному id
         Args:
@@ -69,7 +67,6 @@ class DatabaseManager():
         Return: 
             pass (дописать)
         '''
-        instance = DatabaseManager()
         pass
 
 
@@ -99,4 +96,6 @@ class DatabaseManager():
         return json
 
 
-DatabaseManager.do_insert_db(123)
+DBM = DatabaseManager()
+docu = document1(1, 'сделал тото')
+DBM.do_insert_in_db(docu)
