@@ -1,7 +1,6 @@
 import os
 from fastapi import FastAPI, Depends
 
-
 from app.models.task_model import tasks
 from app.models.database import DatabaseManager
 
@@ -124,7 +123,7 @@ def get_directory(path: str, files_processed: str):
     for df in directory_files:
         if df == files_processed:
             return 'Дириктория уже обработана', False
-    return 'Дириктория не обработана', True 
+    return 'Дириктория не обработана', True
 
 
 @app.get("/database/info")

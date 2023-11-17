@@ -31,7 +31,7 @@ SkyScrubberFastAPI представляет собой [краткое опис�
 
     uvicorn main:app --reload
     или
-    uvicorn main_app:app --host 0.0.0.0 --port 8000 --reload
+    uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
     Приложение будет доступно по адресу 
       http://localhost:8000/
