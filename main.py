@@ -1,10 +1,13 @@
 import os
 from fastapi import FastAPI, Depends
 
-
-
+from app.models.task_model import tasks
+from app.models.database import DatabaseManager
 
 app = FastAPI()
+DBM = DatabaseManager()
+
+
 
 @app.get("/checks_directories_all/{name_directories}/{files_processed}")
 async def read_files_directories_processing(files_processed, name_directories):
@@ -26,16 +29,17 @@ async def read_files_directories_processing(files_processed, name_directories):
     return {path: directories, "обработаные": processed, "не": not_processed }
 
 
-async def get_all_directories(path: str):
+def get_all_directories(path: str):
     '''
     Получает всеx дириктории по выбранному пути.
-    Return directories_all: list, path: str
+    Return: 
+        directories_all: list, path: str
     '''
     directories_all = [f for f in os.listdir(path)]
     return directories_all, path
 
 
-async def checks_processed_directories(directories: list, path: str, files_processed: str):
+def checks_processed_directories(directories: list, path: str, files_processed: str):
     '''
     Функция проверяет выбранные директории на наличие файлов, обработанных нейронной сетью.
     Args:
@@ -61,7 +65,7 @@ async def checks_processed_directories(directories: list, path: str, files_proce
     return processed, not_processed
 
 
-async def replace_underscore_with_slash(string):
+def replace_underscore_with_slash(string):
     '''
     Заменяет все вхождения символа "_" на "/", и добавляет "/" в конец строки.
     Args:
@@ -73,7 +77,7 @@ async def replace_underscore_with_slash(string):
     return result_string + '/' # Добавляем символ "/" в конец строки
 
 
-async def checks_exists_directories(path: str):
+def checks_exists_directories(path: str):
     '''
     Проверяет существование директории по указанному пути.
     Args:
@@ -103,7 +107,7 @@ async def read_files_directory_processing(files_processed, name_directories):
     return get_directory(path, files_processed)
 
 
-async def get_directory(path: str, files_processed: str):
+def get_directory(path: str, files_processed: str):
     '''
     Проверяет наличие папки в указанном пути.
     Args:
@@ -204,13 +208,28 @@ async def send_for_processing_directory(path_to_directory, file_processed, data)
     Return: 
         Возвращает результат; 200 OK
     '''
+    
     path = replace_underscore_with_slash(path_to_directory)
+    print(path)
+
+    
     if not checks_exists_directories(path):
         return f'Путь не верен или директории не существует {path}  проверьте корректность вода'
+    directories, path = get_all_directories(path)
+    
+    arr_json = []
+    for dirictory in directories:
+        path_to_dir = path + dirictory
+        json = tasks(path_to_dir, data)
+        arr_json.append(json)
+    
+    DBM.do_insert_arr_in_db(arr_json)
+    return 200
+    
     
 
-@app.post('/processing_file/{name_file}/{data}')
-async def processing_file(name_file, data):
+@app.post('/processing_file/{path_to_name_file}/{data}')
+async def processing_file(path_to_name_file, data):
     '''
     GET Функция: Функция отправляет файл на обработку нейросетью.
     Args:
@@ -219,4 +238,12 @@ async def processing_file(name_file, data):
     Return: 
         Возвращает результат; 200 OK
     '''
-    pass
+    path = replace_underscore_with_slash(path_to_name_file)
+    print(path)
+
+    
+    if not checks_exists_directories(path):
+        return {f'Путь не верен или директории не существует {path}  проверьте корректность вода'}
+    json = tasks(path, data)
+    DBM.do_insert_in_db(json)
+    return 200
