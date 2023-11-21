@@ -1,4 +1,9 @@
 import os
+from app.models.database import DatabaseManager
+
+
+
+DBM = DatabaseManager()
 
 
 
@@ -82,19 +87,3 @@ def get_directory(path: str, files_processed: str):
         if df == files_processed:
             return 'Дириктория уже обработана', False
     return 'Дириктория не обработана', True 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
