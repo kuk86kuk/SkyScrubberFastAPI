@@ -1,5 +1,6 @@
 from fastapi import APIRouter
-from .main_defs import *
+from app.routers.models.models_db import DataDB
+from app.routers.main_defs import *
 
 
 
@@ -17,8 +18,8 @@ async def info_database():
     pass
 
 
-@router.get("/get/{table}/{count}")
-async def get_data_database(table, count=5):
+@router.get("/get")
+async def get_data_database(collection: DataDB):
     '''
     GET функция: Возвращает строки из базы данных, в количестве, указанном параметром count.
     Args 
@@ -30,8 +31,8 @@ async def get_data_database(table, count=5):
     if count.isdigit():
         return {'count, должен быть числом'}
 
-@router.post("/post/{table}/{id}")
-async def post_data_database(table, id):
+@router.post("/post")
+async def post_data_database(collection: DataDB):
     '''
     DELETE Функция: Удаляет строку из базы данных на основе указанной таблицы и идентификатора (ID).
     Args:
@@ -43,8 +44,8 @@ async def post_data_database(table, id):
     '''
     pass
 
-@router.put("/put/{table}/{id}/{data}")
-async def put_data_database(table, id, data):
+@router.put("/put")
+async def put_data_database(collection: DataDB):
     '''
     PUT Функция: Обновляет строку в определенной таблице базы данных на основе указанного идентификатора (ID).
     Args:
@@ -56,8 +57,8 @@ async def put_data_database(table, id, data):
     '''
     pass
 
-@router.delete("/delete/{collection}/{id}")
-async def delete_data_database(collection, id):
+@router.delete("/delete")
+async def delete_data_database(collection: DataDB):
     '''
     DELETE Функция: Удаляет строку в указанную таблицу базы данных.
     Args:

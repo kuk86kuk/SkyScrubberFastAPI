@@ -1,17 +1,16 @@
 from fastapi import APIRouter
+from app.routers.models.models_processing import Data, Path
 from app.models.task_model import tasks
-from app.models.database import DatabaseManager
-from .main_defs import *
+from app.routers.main_defs import *
 
 
 
 router = APIRouter(prefix='/processing_directory', tags=['processing_directory'])
-DBM = DatabaseManager()
 
 
 
-@router.post('/all/{path_to_directory}/{file_processed}/{data}')
-async def send_for_processing_directory(path_to_directory, file_processed, data):
+@router.post('/all/')
+async def send_for_processing_directory(FileProcessed: Path, data: Data): # FileProcessed: Path,  изменить!!!
     '''
     GET Функция: Функция отправляет директорий на обработку нейросетью.
     Args:
@@ -39,8 +38,8 @@ async def send_for_processing_directory(path_to_directory, file_processed, data)
     
     
 
-@router.post('/{path_to_name_file}/{data}')
-async def processing_file(path_to_name_file, data):
+@router.post('/')
+async def processing_file(path_to_name_file: Path, data: Data): # path_to_name_file: Path,  изменить!!!
     '''
     GET Функция: Функция отправляет файл на обработку нейросетью.
     Args:

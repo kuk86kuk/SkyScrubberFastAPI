@@ -1,5 +1,6 @@
 from fastapi import APIRouter
-from .main_defs import *
+from app.routers.models.models_processing import Path
+from app.routers.main_defs import *
 
 
 
@@ -7,8 +8,8 @@ router = APIRouter(prefix='/checks_directory', tags=['checks_directory'])
 
 
 
-@router.get("/all/{name_directories}/{files_processed}")
-async def read_files_directories_processing(files_processed, name_directories):
+@router.get("/all")
+async def read_files_directories_processing(files_processed: Path): # изменить files_processed: Path!
     '''
     GET функция: Эта функция проверяет, массив директория на наличие обработаных дириктории нейронной сетью.
     Args 
@@ -27,8 +28,8 @@ async def read_files_directories_processing(files_processed, name_directories):
     return {path: directories, "обработаные": processed, "не": not_processed }
 
 
-@router.get("/{name_directories}/{files_processed}")
-async def read_files_directory_processing(files_processed, name_directories):
+@router.get("/")
+async def read_files_directory_processing(files_processed: Path): # изменить files_processed: Path!
     '''
     GET функция: Эта функция проверяет, была ли выбранная директория обработана нейронной сетью.
     Args 
