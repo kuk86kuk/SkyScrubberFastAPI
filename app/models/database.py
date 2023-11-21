@@ -8,7 +8,7 @@ class DatabaseManager():
 
     def do_insert_in_db(self, json):
         '''
-        Cтатический метод, который встовляет выбранный json в базу данных
+        Метод, который встовляет выбранный json в базу данных
         Args:
             db: база данных
             json: json обект который для записи в базу данных
@@ -20,9 +20,9 @@ class DatabaseManager():
         return 200
     
     
-    def do_insert_arr_in_db(self, arr_json):
+    def do_insert_arr_db(self, arr_json):
         '''
-        Cтатический метод, который встовляет массив json в базу данных
+        Метод, который встовляет массив json в базу данных
         Args:
             db: база данных
             arr_json: массив обектов для записи в базу данных
@@ -34,21 +34,24 @@ class DatabaseManager():
         return 200
     
 
-    def remove_line_db(self, db, id):
+    def delete_line_db(self, collection, id):
         '''
-        Cтатический метод, который удаляет json по выбраному id
+        Метод, удаляет json по выбраному id
         Args:
-            db: база данных
+            collection: база данных
             id: id json
         Return: 
             pass (дописать)
         '''
-        pass
+        document_to_delete = {'args': id}
+        self.SETTINGSDB.DB[collection].delete_one(document_to_delete)
+        self.SETTINGSDB.CLIENT.get_io_loop()
+        return 200
     
     
-    def remove_lines_arr_db(self, db, arr_id):
+    def remove_lines_arr_db(self, collection, arr_id):
         '''
-        Cтатический метод, который удаляет массив json по выбраномым id
+        Метод, удаляет массив json по выбраномым id
         Args:
             db: база данных
             arr_id: arr id json
