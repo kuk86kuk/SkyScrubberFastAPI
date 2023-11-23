@@ -10,6 +10,8 @@ def logs(docs, tag_id):
     }
     return json
 
+
+
 def tags(tag, name, process):
     json = {
         "tag": tag,
@@ -18,6 +20,8 @@ def tags(tag, name, process):
         'time': datetime.datetime.now()
     }
     return json
+
+
 
 def tasks(path, args):
     json = {
