@@ -6,7 +6,8 @@ from motor.motor_asyncio import AsyncIOMotorClient
 class SettingsDB():
     def __init__(self,
                   url='mongodb://localhost:27017', 
-                  name_db='skyscrubber') -> None:
+                  name_db='skyscrubber'
+                  ) -> None:
         
         # Создание клиента
         self.CLIENT = AsyncIOMotorClient(url) 
