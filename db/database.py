@@ -1,4 +1,4 @@
-from .settings.settingsDB import SettingsDB
+from db.settingsDB import SettingsDB
 
 
 class DatabaseManager(): 
