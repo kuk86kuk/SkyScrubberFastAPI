@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from app.routers.models.models_db import DataDB
-from app.routers.main_defs import *
+from app.models.db_model import DataDB
+from app.main_defs import *
 
 
 

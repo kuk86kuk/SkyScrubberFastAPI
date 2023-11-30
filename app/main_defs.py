@@ -1,5 +1,5 @@
 import os
-from app.models.database import DatabaseManager
+from db.database import DatabaseManager
 
 
 

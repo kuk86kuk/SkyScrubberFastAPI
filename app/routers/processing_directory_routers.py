@@ -1,7 +1,7 @@
 from fastapi import APIRouter
-from app.routers.models.models_processing import Data, Path
-from app.models.task_model import tasks
-from app.routers.main_defs import *
+from app.models.db_model import Data, Path
+from app.models.collections_model import tasks
+from app.main_defs import *
 
 
 
