@@ -1,4 +1,6 @@
 import os
+import random
+import string
 
 from fastapi import FastAPI, HTTPException, APIRouter
 from fastapi.responses import JSONResponse
@@ -8,15 +10,15 @@ from bson import ObjectId
 from db.settingsDB import SettingsDB
 from ..models.collections_model import Task, Tag, Log
 from ..routers.tag_routers import create_tag
- 
+from ..utils.log_utils import create_log_entry
 
 router = APIRouter(prefix='/tasks', tags=['tasks'])
 
 settingsDB = SettingsDB()
 
 tasks_collection = settingsDB.COLLECTION_TASKS
+tags_collection = settingsDB.COLLECTION_TAGS
 
-# Эндпоинт для тестов, чтобы имитировать работу Task Manager'а
 @router.post("/create_task")
 async def create_task(tag: Tag):
     try:
@@ -26,15 +28,12 @@ async def create_task(tag: Tag):
         })
 
         created_task = await tasks_collection.insert_one(task.dict())
-        # Получаем автоматически сгенерированный _id
         task_id = str(created_task.inserted_id)
 
-        # Создаем объект Tag внутри эндпоинта, используя тот же _id
-        tag = Tag(neuro_id=tag.neuro_id, args=tag.args)
+        tag = Tag(neuro_id=tag.neuro_id, args=tag.args, task_id=task_id)
+        await tags_collection.insert_one(tag.dict())
 
-        # Подставляем _id
-        tag.id = task_id
-        await create_tag(tag)
+        log = await create_log_entry(tag_id=task_id, rel_path_to_project=f"neuro/{tag.neuro_id}/{task_id}")
 
         return JSONResponse(content={}, status_code=200)
     except Exception as e:
