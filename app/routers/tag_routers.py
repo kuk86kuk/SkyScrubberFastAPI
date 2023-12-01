@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from bson import ObjectId
 from db.settingsDB import SettingsDB
 from ..models.collections_model import Task, Tag, Log
-
+from ..utils.log_utils import *
 router = APIRouter(prefix='/tags', tags=['tags'])
 
 settingsDB = SettingsDB()
@@ -18,10 +18,16 @@ logs_collection = settingsDB.COLLECTION_LOGS
 @router.post("/create_tag")
 async def create_tag(tag: Tag):
     try:
-        created_tag = await tags_collection.insert_one(tag.dict())
+        # Исключаем поле id из словаря, чтобы избежать конфликта с _id в MongoDB
+        tag_dict = tag.dict(exclude={"id"})
+
+        created_tag = await tags_collection.insert_one(tag_dict)
 
         tag_folder_path = f"neuro/{tag.neuro_id}/{str(created_tag.inserted_id)}"
         os.makedirs(tag_folder_path, exist_ok=True)
+
+        rel_path_to_project = f"neuro/{tag.neuro_id}/{tag.id}"
+        log_entry = await create_log_entry(tag.id, rel_path_to_project)
 
         return JSONResponse(content={}, status_code=200)
     except Exception as e:
@@ -69,39 +75,3 @@ async def update_tag_args(tag_id: str, new_args: dict):
         print(error_message)
         raise HTTPException(status_code=500, detail=error_message)
 
-# async def get_task(task_id: str):
-#     task = await collection.find_one({"_id": ObjectId(task_id)})
-#     return task
-
-# @router.get("/get_task/{task_id}", response_model=Task)
-# async def read_task(task_id: str):
-#     task = await get_task(task_id)
-#     if task:
-#         return task
-#     else:
-#         raise HTTPException(status_code=404, detail="Task not found")
-    
-# @router.delete("/delete_task/{task_id}", response_model=Task)
-# async def delete_task(task_id: str):
-#     task = await get_task(task_id)
-#     if task:
-#         # Удаляем задачу
-#         await collection.delete_one({"_id": ObjectId(task_id)})
-#         return task
-#     else:
-#         raise HTTPException(status_code=404, detail="Task not found")
-    
-# @router.put("/update_task/{task_id}", response_model=Task)
-# async def update_task(task_id: str, updated_task: dict):
-#     existing_task = await get_task(task_id)
-#     if existing_task:
-#         # Обновляем поле только поле description!!!
-#         await collection.update_one(
-#             {"_id": ObjectId(task_id)},
-#             {"$set": {"description": updated_task["description"]}}
-#         )
-#         # Получаем обновленную задачу
-#         updated_task = await get_task(task_id)
-#         return updated_task
-#     else:
-#         raise HTTPException(status_code=404, detail="Task not found")
