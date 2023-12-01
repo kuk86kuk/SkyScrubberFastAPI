@@ -8,7 +8,7 @@ class Task(BaseModel):
     args:Union[Json, dict] 
     
 class Tag(BaseModel):
-    id: Optional[str] = None
+    task_id: Optional[str] = None
     neuro_id: str #Т.е. какая нейронка запущена
     args:Union[Json, dict] 
 

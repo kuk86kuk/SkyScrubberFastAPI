@@ -18,16 +18,13 @@ logs_collection = settingsDB.COLLECTION_LOGS
 @router.post("/create_tag")
 async def create_tag(tag: Tag):
     try:
-        # Исключаем поле id из словаря, чтобы избежать конфликта с _id в MongoDB
-        tag_dict = tag.dict(exclude={"id"})
+        created_tag = await tags_collection.insert_one(tag.dict())
+        tag_id = str(created_tag.inserted_id)
 
-        created_tag = await tags_collection.insert_one(tag_dict)
-
-        tag_folder_path = f"neuro/{tag.neuro_id}/{str(created_tag.inserted_id)}"
+        tag_folder_path = f"neuro/{tag.neuro_id}/{tag_id}"
         os.makedirs(tag_folder_path, exist_ok=True)
 
-        rel_path_to_project = f"neuro/{tag.neuro_id}/{tag.id}"
-        log_entry = await create_log_entry(tag.id, rel_path_to_project)
+        await create_log_entry(tag_id=tag_id, rel_path_to_project=f"neuro/{tag.neuro_id}/{tag_id}")
 
         return JSONResponse(content={}, status_code=200)
     except Exception as e:
