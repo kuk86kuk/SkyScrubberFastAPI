@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from app.models.db_model import Path
-from app.main_defs import *
+from app.utils.directory_utils import *
 
 
 
