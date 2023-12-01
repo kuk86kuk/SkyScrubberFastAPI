@@ -39,3 +39,45 @@ async def create_task(tag: Tag):
         return JSONResponse(content={}, status_code=200)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/get_task/{task_id}")
+async def get_task(task_id: str):
+    try:
+        task = await tasks_collection.find_one({"_id": ObjectId(task_id)})
+        if task:
+            # Преобразование ObjectId в строку
+            task["_id"] = str(task["_id"])
+            return JSONResponse(content=task, status_code=200)
+        else:
+            raise HTTPException(status_code=404, detail="Task not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/delete_task/{task_id}")
+async def delete_task(task_id: str):
+    try:
+        result = await tasks_collection.delete_one({"_id": ObjectId(task_id)})
+        if result.deleted_count == 1:
+            return JSONResponse(content={"message": "Task deleted successfully"}, status_code=200)
+        else:
+            raise HTTPException(status_code=404, detail="Task not found")
+    except Exception as e:
+        error_message = f"Error in delete_task: {e}"
+        print(error_message)
+        raise HTTPException(status_code=500, detail=error_message)
+
+@router.put("/update_task_args/{task_id}")
+async def update_task_args(task_id: str, new_args: dict):
+    try:
+        result = await tasks_collection.update_one(
+            {"_id": ObjectId(task_id)},
+            {"$set": {"args": new_args}}
+        )
+        if result.modified_count == 1:
+            return JSONResponse(content={"message": "Task args updated successfully"}, status_code=200)
+        else:
+            raise HTTPException(status_code=404, detail="Task not found")
+    except Exception as e:
+        error_message = f"Error in update_task_args: {e}"
+        print(error_message)
+        raise HTTPException(status_code=500, detail=error_message)
