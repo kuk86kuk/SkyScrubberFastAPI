@@ -2,6 +2,14 @@
 __pycache__/
 *.py[cod]
 *$py.class
+networks
+neuro/
+images
+detection.py
+model1.pt
+model2.pt
+run.bat
+.vscode
 
 # C extensions
 *.so
