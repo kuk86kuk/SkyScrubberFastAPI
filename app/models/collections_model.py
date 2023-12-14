@@ -6,16 +6,17 @@ from typing import Union, Optional
 class Task(BaseModel):
     task_id: str
     neuro_id: str
-    args:Union[Json, dict] 
+    kwargs:Union[Json, dict] 
     
 class Tag(BaseModel):
     tag_id: Optional[str] = None
     task_id: Optional[str] = None
     neuro_id: str #Т.е. какая нейронка запущена
-    args:Union[Json, dict] 
+    kwargs:Union[Json, dict] 
 
 class Log(BaseModel):
     id: str
+    task_id: str
     tag_id: Optional[str] = None
     status: str
     name_doc: str #doc - Это фотка в формате .tif
