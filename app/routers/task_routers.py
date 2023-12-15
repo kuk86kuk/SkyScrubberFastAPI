@@ -23,9 +23,9 @@ tags_collection = settingsDB.COLLECTION_TAGS
 @router.post("/create_task")
 async def create_task(tag: Tag):
     try:
-        task_id = str(uuid4())  # Генерируем уникальный task_id с помощью uuid4
-        tag_id = str(uuid4()) # Генерируем уникальный tag_id с помощью uuid4
-        log_id = str(uuid4()) # Генерируем уникальный tag_id с помощью uuid4
+        task_id = str(uuid4())  
+        tag_id = str(uuid4()) 
+        log_id = str(uuid4()) 
 
         task = Task(**{
             "task_id": task_id,
@@ -37,7 +37,7 @@ async def create_task(tag: Tag):
 
         tag = Tag(neuro_id=tag.neuro_id, kwargs=tag.kwargs, task_id=task_id, tag_id=tag_id)
         await tags_collection.insert_one(tag.dict())
-
+        await create_tag(tag)
         log = await create_log_entry(task_id=task_id, tag_id=tag_id, log_id=log_id, rel_path_to_project=f"neuro/{tag.neuro_id}/{task_id}")
 
         return JSONResponse(content={"message": "Success!"}, status_code=status.HTTP_200_OK)
