@@ -1,6 +1,6 @@
 import os
 
-from fastapi import FastAPI, HTTPException, APIRouter, status
+from fastapi import FastAPI, HTTPException, APIRouter, status, BackgroundTasks
 from fastapi.responses import JSONResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel
@@ -9,9 +9,11 @@ from bson import ObjectId
 from db.settingsDB import SettingsDB
 from ..models.collections_model import Task, Tag, Log
 from ..utils.log_utils import *
+from ..utils.neuro_utils import *
 router = APIRouter(prefix='/tags', tags=['tags'])
 
 settingsDB = SettingsDB()
+background_tasks = BackgroundTasks()
 
 tags_collection = settingsDB.COLLECTION_TAGS
 logs_collection = settingsDB.COLLECTION_LOGS
@@ -19,15 +21,14 @@ logs_collection = settingsDB.COLLECTION_LOGS
 @router.post("/create_tag")
 async def create_tag(tag: Tag):
     try:
-
         created_tag = await tags_collection.insert_one(tag.dict())
-        inserted_id = created_tag.inserted_id # тут был tag_id
-
+        inserted_id = created_tag.inserted_id 
         tag_folder_path = f"neuro/{tag.neuro_id}/{inserted_id}"
         os.makedirs(tag_folder_path, exist_ok=True)
 
-        #await create_log_entry(tag_id=tag_id, rel_path_to_project=f"neuro/{tag.neuro_id}/{inserted_id}")
-
+        rel_path_to_project = f"neuro/{tag.neuro_id}/{tag.id}"
+        run_neural_network(tag.get("neuro_id"), tag.kwargs, rel_path_to_project)
+        background_tasks.add_task(run_neural_network, tag.get("neuro_id"), tag.kwargs, rel_path_to_project)
         return JSONResponse(content={"message": "Tag created successfully"}, status_code=status.HTTP_200_OK)
     except Exception as e:
         return JSONResponse(content={"message": f"Failed to create tag. Error: {str(e)}"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
