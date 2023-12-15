@@ -27,8 +27,8 @@ async def create_tag(tag: Tag):
         os.makedirs(tag_folder_path, exist_ok=True)
 
         rel_path_to_project = f"neuro/{tag.neuro_id}/{tag.id}"
-        run_neural_network(tag.get("neuro_id"), tag.kwargs, rel_path_to_project)
-        background_tasks.add_task(run_neural_network, tag.get("neuro_id"), tag.kwargs, rel_path_to_project)
+        #run_neural_network(tag.get("neuro_id"), tag.kwargs, rel_path_to_project)
+        #background_tasks.add_task(run_neural_network, tag.get("neuro_id"), tag.kwargs, rel_path_to_project)
         return JSONResponse(content={"message": "Tag created successfully"}, status_code=status.HTTP_200_OK)
     except Exception as e:
         return JSONResponse(content={"message": f"Failed to create tag. Error: {str(e)}"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
