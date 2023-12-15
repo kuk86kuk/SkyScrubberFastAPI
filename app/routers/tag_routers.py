@@ -26,7 +26,7 @@ async def create_tag(tag: Tag):
         tag_folder_path = f"neuro/{tag.neuro_id}/{inserted_id}"
         os.makedirs(tag_folder_path, exist_ok=True)
 
-        await create_log_entry(tag_id=tag_id, rel_path_to_project=f"neuro/{tag.neuro_id}/{inserted_id}")
+        #await create_log_entry(tag_id=tag_id, rel_path_to_project=f"neuro/{tag.neuro_id}/{inserted_id}")
 
         return JSONResponse(content={"message": "Tag created successfully"}, status_code=status.HTTP_200_OK)
     except Exception as e:
