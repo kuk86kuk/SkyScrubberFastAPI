@@ -1,7 +1,6 @@
 import os
 import random
 import string
-
 from fastapi import FastAPI, HTTPException, APIRouter, status, Depends
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer
@@ -12,18 +11,22 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel
 from uuid import uuid4
 from bson import ObjectId
-from db.settingsDB import SettingsDB
 from ..models.collections_model import Task, Tag, Log
 from ..routers.tag_routers import create_tag
 from ..utils.log_utils import create_log_entry
+from db.settingsDB import settingsDB
+
+
 
 router = APIRouter(prefix='/tasks', tags=['tasks'])
 
-settingsDB = SettingsDB()
+
 
 tasks_collection = settingsDB.COLLECTION_TASKS
 tags_collection = settingsDB.COLLECTION_TAGS
 
+@router.post("/")
+async def create_task(tag: Tag):
 SECRET_KEY = "your-secret-key"
 ALGORITHM = "HS256"
 
@@ -99,6 +102,7 @@ async def create_task(tag: Tag, current_user: dict = Depends(get_current_user)):
     except Exception as e:
         return JSONResponse(content={"message": f"Error: {str(e)}"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 @router.get("/{task_id}")
 async def get_task(task_id: str, current_user: dict = Depends(get_current_user)):
     '''
@@ -128,6 +132,7 @@ async def get_task(task_id: str, current_user: dict = Depends(get_current_user))
     except Exception as e:
         return JSONResponse(content={"message": f"Error: {str(e)}"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 @router.delete("/{task_id}")
 async def delete_task(task_id: str, current_user: dict = Depends(get_current_user)):
     '''
@@ -153,6 +158,7 @@ async def delete_task(task_id: str, current_user: dict = Depends(get_current_use
             return JSONResponse(content={"message": "Task not found"}, status_code=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return JSONResponse(content={"message": f"Error: {str(e)}"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @router.put("/{task_id}")
 async def update_task_args(task_id: str, new_kwargs: dict, current_user: dict = Depends(get_current_user)):

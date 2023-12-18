@@ -1,22 +1,21 @@
 import os
-
 from fastapi import FastAPI, HTTPException, APIRouter, status, BackgroundTasks
 from fastapi.responses import JSONResponse
-from motor.motor_asyncio import AsyncIOMotorClient
-from pydantic import BaseModel
 from uuid import uuid4
 from bson import ObjectId
-from db.settingsDB import SettingsDB
 from ..models.collections_model import Task, Tag, Log
 from ..utils.log_utils import *
 from ..utils.neuro_utils import *
-router = APIRouter(prefix='/tags', tags=['tags'])
+from db.settingsDB import settingsDB
 
-settingsDB = SettingsDB()
+
+router = APIRouter(prefix='/tags', tags=['tags'])
 background_tasks = BackgroundTasks()
+
 
 tags_collection = settingsDB.COLLECTION_TAGS
 logs_collection = settingsDB.COLLECTION_LOGS
+
 
 @router.post("/")
 async def create_tag(tag: Tag):
@@ -47,6 +46,7 @@ async def create_tag(tag: Tag):
     except Exception as e:
         return JSONResponse(content={"message": f"Failed to create tag. Error: {str(e)}"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 @router.get("/{tag_id}")
 async def get_tag(tag_id: str):
     '''
@@ -76,6 +76,7 @@ async def get_tag(tag_id: str):
     except Exception as e:
         return JSONResponse(content={"message": f"Error: {str(e)}"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 @router.delete("/{tag_id}")
 async def delete_tag(tag_id: str):
     '''
@@ -101,6 +102,7 @@ async def delete_tag(tag_id: str):
             return JSONResponse(content={"message": "Tag not found"}, status_code=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return JSONResponse(content={"message": f"Error: {str(e)}"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @router.put("/{tag_id}")
 async def update_tag_args(tag_id: str, new_args: dict):
