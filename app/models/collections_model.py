@@ -19,9 +19,6 @@ class Log(BaseModel):
     task_id: str
     tag_id: Optional[str] = None
     status: str
-    name_doc: str #doc - Это фотка в формате .tif
-    path_to_doc: str
-    progress_doc: str
     path_to_project: str
     progress_project: str
     register_date: datetime.datetime = Field(default_factory=datetime.datetime.now)
