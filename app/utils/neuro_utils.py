@@ -1,7 +1,11 @@
-from detection import MaskInpainting, BigImage
+#from detection import MaskInpainting, BigImage
+
+
 
 async def run_neural_network(neuro_id, kwargs, tag_folder_path):
          dev_opt_remove(kwargs, tag_folder_path)
+
+
 
 async def dev_opt_remove(kwargs, tag_folder_path):
     try:
@@ -13,7 +17,7 @@ async def dev_opt_remove(kwargs, tag_folder_path):
         patch_shape = kwargs.get("patch_shape", [512, 512])
         step_patch = kwargs.get("step_patch", [512, 512])
 
-        mask_inpainting = MaskInpainting(device=device, sigma=sigma)
+        mask_inpainting =  None#MaskInpainting(device=device, sigma=sigma)
         mask_inpainting.retouch_dir(
             root_dir=image_dir,
             file_format=image_format,

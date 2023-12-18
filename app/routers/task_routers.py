@@ -1,26 +1,27 @@
 import os
 import random
 import string
-
-from fastapi import FastAPI, HTTPException, APIRouter, status
+from fastapi import HTTPException, APIRouter, status
 from fastapi.responses import JSONResponse
-from motor.motor_asyncio import AsyncIOMotorClient
-from pydantic import BaseModel
 from uuid import uuid4
 from bson import ObjectId
-from db.settingsDB import SettingsDB
 from ..models.collections_model import Task, Tag, Log
 from ..routers.tag_routers import create_tag
 from ..utils.log_utils import create_log_entry
+from db.settingsDB import settingsDB
+
+
 
 router = APIRouter(prefix='/tasks', tags=['tasks'])
 
-settingsDB = SettingsDB()
+
 
 tasks_collection = settingsDB.COLLECTION_TASKS
 tags_collection = settingsDB.COLLECTION_TAGS
 
-@router.post("/create_task")
+
+
+@router.post("/")
 async def create_task(tag: Tag):
     try:
         task_id = str(uuid4())  
@@ -44,7 +45,9 @@ async def create_task(tag: Tag):
     except Exception as e:
         return JSONResponse(content={"message": f"Error: {str(e)}"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@router.get("/get_task/{task_id}")
+
+
+@router.get("/{task_id}")
 async def get_task(task_id: str):
     try:
         # Проекция для исключения поля _id
@@ -58,7 +61,9 @@ async def get_task(task_id: str):
     except Exception as e:
         return JSONResponse(content={"message": f"Error: {str(e)}"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@router.delete("/delete_task/{task_id}")
+
+
+@router.delete("/{task_id}")
 async def delete_task(task_id: str):
     try:
         result = await tasks_collection.delete_one({"task_id": task_id})
@@ -69,7 +74,9 @@ async def delete_task(task_id: str):
     except Exception as e:
         return JSONResponse(content={"message": f"Error: {str(e)}"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@router.put("/update_task_args/{task_id}")
+
+
+@router.put("/{task_id}")
 async def update_task_args(task_id: str, new_kwargs: dict):
     try:
         result = await tasks_collection.update_one(
