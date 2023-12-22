@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI, HTTPException, APIRouter, status, BackgroundTasks
+from fastapi import FastAPI, HTTPException, APIRouter, status, BackgroundTasks, Depends
 from fastapi.responses import JSONResponse
 from uuid import uuid4
 from bson import ObjectId
@@ -7,7 +7,7 @@ from app.models.collections_model import Task, Tag, Log
 from ..utils.log_utils import *
 from ..utils.neuro_utils import *
 from db.settingsDB import settingsDB
-
+from ..utils.auth_utils import decode_jwt_token
 
 router = APIRouter(prefix='/tags', tags=['tags'])
 background_tasks = BackgroundTasks()
@@ -18,7 +18,7 @@ logs_collection = settingsDB.COLLECTION_LOGS
 
 
 @router.post("/")
-async def create_tag(tag: Tag):
+async def create_tag(tag: Tag, current_user: dict = Depends(decode_jwt_token)):
     '''
     POST функция: Создает тег (tag).
     Parameters:
@@ -45,7 +45,7 @@ async def create_tag(tag: Tag):
 
 
 @router.get("/{tag_id}")
-async def get_tag(tag_id: str):
+async def get_tag(tag_id: str, current_user: dict = Depends(decode_jwt_token)):
     '''
     GET функция: Получает информацию о теге по его идентификатору.
 
@@ -75,7 +75,7 @@ async def get_tag(tag_id: str):
 
 
 @router.delete("/{tag_id}")
-async def delete_tag(tag_id: str):
+async def delete_tag(tag_id: str, current_user: dict = Depends(decode_jwt_token)):
     '''
     DELETE функция: Удаляет тег по его идентификатору.
 
@@ -102,7 +102,7 @@ async def delete_tag(tag_id: str):
 
 
 @router.put("/{tag_id}")
-async def update_tag_args(tag_id: str, new_args: dict):
+async def update_tag_args(tag_id: str, new_args: dict, current_user: dict = Depends(decode_jwt_token)):
     '''
     PUT функция: Обновляет аргументы тега по его идентификатору.
 
