@@ -5,9 +5,7 @@ from fastapi import FastAPI, HTTPException, APIRouter, status, Depends
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer
 import jwt
-from jwt import PyJWTError
 from typing import Optional
-from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel
 from uuid import uuid4
 from bson import ObjectId
@@ -25,16 +23,11 @@ router = APIRouter(prefix='/tasks', tags=['tasks'])
 tasks_collection = settingsDB.COLLECTION_TASKS
 tags_collection = settingsDB.COLLECTION_TAGS
 
-@router.post("/")
-async def create_task(tag: Tag):
+
 SECRET_KEY = "your-secret-key"
 ALGORITHM = "HS256"
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-class TokenRequest(BaseModel):
-    username: str
-    password: str
+    
 
 # @router.post("/token")
 # async def login_for_access_token(token_request: TokenRequest):
