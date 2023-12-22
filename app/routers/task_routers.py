@@ -5,7 +5,6 @@ import string
 from fastapi import FastAPI, HTTPException, APIRouter, status, Depends
 from fastapi.responses import JSONResponse
 from typing import Optional
-from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel
 from uuid import uuid4
 from bson import ObjectId
@@ -22,6 +21,7 @@ router = APIRouter(prefix='/tasks', tags=['tasks'])
 
 tasks_collection = settingsDB.COLLECTION_TASKS
 tags_collection = settingsDB.COLLECTION_TAGS
+
 
 
 @router.post("/")

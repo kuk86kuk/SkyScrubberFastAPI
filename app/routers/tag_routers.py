@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException, APIRouter, status, BackgroundTasks, 
 from fastapi.responses import JSONResponse
 from uuid import uuid4
 from bson import ObjectId
-from ..models.collections_model import Task, Tag, Log
+from app.models.collections_model import Task, Tag, Log
 from ..utils.log_utils import *
 from ..utils.neuro_utils import *
 from db.settingsDB import settingsDB
@@ -21,15 +21,12 @@ logs_collection = settingsDB.COLLECTION_LOGS
 async def create_tag(tag: Tag, current_user: dict = Depends(decode_jwt_token)):
     '''
     POST функция: Создает тег (tag).
-
     Parameters:
     - tag: Объект типа Tag, содержащий информацию о теге.
-
     Returns:
     JSONResponse с информацией об успешном создании тега или сообщением об ошибке.
     - В случае успешного создания: {"message": "Tag created successfully"} (статус 200 OK).
     - В случае ошибки: Сообщение об ошибке (статус 500 Internal Server Error).
-
     Описание:
     Эта функция обрабатывает POST-запросы для создания тега. Создается объект тега, добавляется в соответствующую коллекцию, и создается папка для тега в файловой системе. Затем возвращается JSONResponse с информацией об успешном создании тега. В случае ошибки возвращается соответствующее сообщение с статусом 500 Internal Server Error.
     '''

@@ -1,7 +1,6 @@
 from fastapi import FastAPI
-from app.routers import db_routers, tag_routers, task_routers, progress_bar
+from app.routers import db_routers, tag_routers, task_routers, log_routers, progress_bar, auth_routers
 from db.settingsDB import SettingsDB
-from app.routers import db_routers, tag_routers, task_routers, log_routers, auth_routers
 
 
 app = FastAPI()
