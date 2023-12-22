@@ -26,7 +26,7 @@ async def dev_opt_remove(kwargs, tag_folder_path):
         return {"status": "success", "message": "Neural network processing completed."}
     except Exception as e:
         return {"status": "error", "message": f"Error during neural network processing: {str(e)}"} 
-=======
+# =======
 # async def dev_opt_remove(kwargs, tag_folder_path):
 #     try:
 #         image_dir = kwargs.get("image_dir", "../images")

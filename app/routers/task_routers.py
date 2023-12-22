@@ -1,14 +1,9 @@
 import os
 import random
 import string
-import jwt
-import secrets
 
 from fastapi import FastAPI, HTTPException, APIRouter, status, Depends
 from fastapi.responses import JSONResponse
-from fastapi.security import OAuth2PasswordBearer,  OAuth2PasswordRequestForm
-from jose import JWTError, jwt
-from jwt import PyJWTError
 from typing import Optional
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel
@@ -18,67 +13,16 @@ from ..models.collections_model import Task, Tag, Log
 from ..routers.tag_routers import create_tag
 from ..utils.log_utils import create_log_entry
 from db.settingsDB import settingsDB
+from ..utils.auth_utils import decode_jwt_token
 
 #pip install fastapi uvicorn python-jose
 
 router = APIRouter(prefix='/tasks', tags=['tasks'])
 
-# Секретный ключ для подписи и верификации JWT
-SECRET_KEY = "your-secret-key"
-ALGORITHM = "HS256"
 
 tasks_collection = settingsDB.COLLECTION_TASKS
 tags_collection = settingsDB.COLLECTION_TAGS
 
-
-class User(BaseModel):
-    username: str
-    password: str
-
-users_db = {
-    "user1": User(username="user1", password="password1"),
-    "user2": User(username="user2", password="password2"),
-}
-
-def authenticate_user(username: str, password: str):
-    user = users_db.get(username)
-    if user and user.password == password:
-        return user
-    return None
-
-secret_key = secrets.token_urlsafe(32)
-
-def create_jwt_token(data: dict):
-    to_encode = data.copy()
-    # Генерация токена
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-
-# Функция для верификации токена
-def decode_jwt_token(token: str = Depends(OAuth2PasswordBearer(tokenUrl="/tasks/token"))):
-    credentials_exception = HTTPException(
-        status_code=401,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return payload
-    except JWTError:
-        raise credentials_exception
-
-@router.post("/token")
-def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    # Ваш код аутентификации
-    user = authenticate_user(form_data.username, form_data.password)
-    
-    # Если пользователь аутентифицирован, генерировать токен
-    if user:
-        token_data = {"sub": form_data.username}
-        access_token = create_jwt_token(token_data)
-        return {"access_token": access_token, "token_type": "bearer"}
-    else:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
 
 @router.post("/")
 async def create_task(tag: Tag, current_user: dict = Depends(decode_jwt_token)):
