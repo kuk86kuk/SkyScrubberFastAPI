@@ -1,11 +1,9 @@
 import os
 import random
 import string
+
 from fastapi import FastAPI, HTTPException, APIRouter, status, Depends
 from fastapi.responses import JSONResponse
-from fastapi.security import OAuth2PasswordBearer
-import jwt
-from jwt import PyJWTError
 from typing import Optional
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel
@@ -15,57 +13,19 @@ from ..models.collections_model import Task, Tag, Log
 from ..routers.tag_routers import create_tag
 from ..utils.log_utils import create_log_entry
 from db.settingsDB import settingsDB
+from ..utils.auth_utils import decode_jwt_token
 
-
+#pip install fastapi uvicorn python-jose
 
 router = APIRouter(prefix='/tasks', tags=['tasks'])
-
 
 
 tasks_collection = settingsDB.COLLECTION_TASKS
 tags_collection = settingsDB.COLLECTION_TAGS
 
-@router.post("/")
-async def create_task(tag: Tag):
-SECRET_KEY = "your-secret-key"
-ALGORITHM = "HS256"
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-class TokenRequest(BaseModel):
-    username: str
-    password: str
-
-# @router.post("/token")
-# async def login_for_access_token(token_request: TokenRequest):
-#     # Пример простой логики аутентификации
-#     if token_request.username and token_request.password:
-#         user = token_request.username
-#         access_token = create_access_token(data={"sub": user})
-#         return {"access_token": access_token, "token_type": "bearer"}
-#     else:
-#         return {"error": "Invalid credentials"}
-
-def create_access_token(data: dict):
-    encoded_jwt = jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        # здесь ты можешь валидировать и декодировать данные из токена
-        # и использовать их для аутентификации пользователя
-        # например, ты можешь получить идентификатор пользователя из payload и использовать его для аутентификации
-    except PyJWTError:
-        raise credentials_exception
 
 @router.post("/")
-async def create_task(tag: Tag, current_user: dict = Depends(get_current_user)):
+async def create_task(tag: Tag, current_user: dict = Depends(decode_jwt_token)):
     '''
     POST функция: Создает задачу (task).
 
@@ -104,7 +64,7 @@ async def create_task(tag: Tag, current_user: dict = Depends(get_current_user)):
 
 
 @router.get("/{task_id}")
-async def get_task(task_id: str, current_user: dict = Depends(get_current_user)):
+async def get_task(task_id: str, current_user: dict = Depends(decode_jwt_token)):
     '''
     GET функция: Получает информацию о задаче по её идентификатору.
 
@@ -134,7 +94,7 @@ async def get_task(task_id: str, current_user: dict = Depends(get_current_user))
 
 
 @router.delete("/{task_id}")
-async def delete_task(task_id: str, current_user: dict = Depends(get_current_user)):
+async def delete_task(task_id: str, current_user: dict = Depends(decode_jwt_token)):
     '''
     DELETE функция: Удаляет задачу по её идентификатору.
 
@@ -161,7 +121,7 @@ async def delete_task(task_id: str, current_user: dict = Depends(get_current_use
 
 
 @router.put("/{task_id}")
-async def update_task_args(task_id: str, new_kwargs: dict, current_user: dict = Depends(get_current_user)):
+async def update_task_args(task_id: str, new_kwargs: dict, current_user: dict = Depends(decode_jwt_token)):
     '''
     PUT функция: Обновляет аргументы задачи по её идентификатору.
 
