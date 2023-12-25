@@ -1,8 +1,7 @@
-import jwt
 import secrets
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError
+from jose import JWTError, jwt
 from typing import Optional
 from ..utils.user_utils import User, users_db
 
