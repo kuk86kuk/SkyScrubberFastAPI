@@ -57,6 +57,29 @@ async def get_tags_in_process():
     active_tasks = celery.control.inspect().active()
     return {active_tasks}
 
+@router.get("/progress/{tag_id}")
+async def get_progress(tag_id: str):
+    try:
+        log_entry = logs_collection.find_one({"tag_id": tag_id})
+
+        if log_entry is None:
+            raise HTTPException(status_code=404, detail=f"Log entry with tag_id {tag_id} not found")
+
+        kwargs = log_entry.get("kwargs", {})
+        save_dir = kwargs.get("save_dir", "save_image")  
+
+        processed_files = len(os.listdir(os.path.join(save_dir)))
+        unprocessed_files = len(os.listdir(os.path.join(log_entry["path_to_project"])))
+
+        total_files = processed_files + unprocessed_files
+        progress = (processed_files / total_files) * 100 if total_files > 0 else 0
+
+        return JSONResponse(content={"progress": progress, "total_files": total_files})
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/{tag_id}")
 async def get_tag(tag_id: str, current_user: dict = Depends(decode_jwt_token)):
     '''

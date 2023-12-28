@@ -13,7 +13,7 @@ logger = get_task_logger(__name__)
 def run_neural_network(self, neuro_id, kwargs, tag_folder_path):
     try:
         # Ваш код задачи
-        time.sleep(20)
+        time.sleep(5)
         logger.info(f"Task {self.request.id} completed successfully.")
         return {"status": "completed"}
     except Exception as e:

@@ -18,8 +18,8 @@ class Log(BaseModel):
     id: str
     task_id: str
     tag_id: str = None
+    kwargs:Union[Json, dict] 
     path_to_project: str
-    progress_project: str
     register_date: datetime.datetime = Field(default_factory=datetime.datetime.now)
 
     class Config:
