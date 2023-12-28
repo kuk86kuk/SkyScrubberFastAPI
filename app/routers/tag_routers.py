@@ -8,6 +8,9 @@ from ..utils.log_utils import *
 from ..utils.neuro_utils import *
 from db.settingsDB import settingsDB
 from ..utils.auth_utils import decode_jwt_token
+from celery.result import AsyncResult
+from starlette import status
+from celery import current_app 
 
 router = APIRouter(prefix='/tags', tags=['tags'])
 background_tasks = BackgroundTasks()
@@ -37,11 +40,22 @@ async def create_tag(tag: Tag, current_user: dict = Depends(decode_jwt_token)):
         os.makedirs(tag_folder_path, exist_ok=True)
 
         rel_path_to_project = f"neuro/{tag.neuro_id}/{tag.tag_id}"
-        run_neural_network.delay(tag.neuro_id, tag.kwargs, rel_path_to_project)
-        return JSONResponse(content={"message": "Tag created successfully"}, status_code=status.HTTP_200_OK)
+        task_id = tag.tag_id
+        run_neural_network.apply_async(args=[tag.neuro_id, tag.kwargs, rel_path_to_project], task_id=task_id)        
+        return JSONResponse(status_code=status.HTTP_201_CREATED)
     except Exception as e:
         return JSONResponse(content={"message": f"Failed to create tag. Error: {str(e)}"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@router.get("/tag-status/{tag_id}")
+async def get_tag_status(tag_id: str):
+    result = AsyncResult(tag_id, app=celery)
+    task_status = result.state
+    return {"task_id": tag_id, "status": task_status}
+    
+@router.get("/in_process")
+async def get_tags_in_process():
+    active_tasks = celery.control.inspect().active()
+    return {active_tasks}
 
 @router.get("/{tag_id}")
 async def get_tag(tag_id: str, current_user: dict = Depends(decode_jwt_token)):

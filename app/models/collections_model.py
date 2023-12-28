@@ -18,8 +18,6 @@ class Log(BaseModel):
     id: str
     task_id: str
     tag_id: str = None
-    status: str
-    path_to_directories: str
     path_to_project: str
     progress_project: str
     register_date: datetime.datetime = Field(default_factory=datetime.datetime.now)

@@ -4,15 +4,21 @@ from concurrent.futures import ThreadPoolExecutor
 import asyncio
 import concurrent.futures
 import time
+from celery.utils.log import get_task_logger
 
-celery = Celery('tasks', broker='redis://localhost:6379')
+celery = Celery('tasks', broker='redis://localhost:6379', backend='redis://localhost:6379')
+logger = get_task_logger(__name__)
 
-executor = ThreadPoolExecutor(max_workers=2)
-
-@celery.task
-def run_neural_network(neuro_id, kwargs, tag_folder_path):
-    #dev_opt_remove(kwargs, tag_folder_path)
-    time.sleep(5)
+@celery.task(bind=True)
+def run_neural_network(self, neuro_id, kwargs, tag_folder_path):
+    try:
+        # Ваш код задачи
+        time.sleep(20)
+        logger.info(f"Task {self.request.id} completed successfully.")
+        return {"status": "completed"}
+    except Exception as e:
+        logger.error(f"Task {self.request.id} failed with error: {str(e)}")
+        raise
 
 # def dev_opt_remove(kwargs, tag_folder_path):
 #     try:
