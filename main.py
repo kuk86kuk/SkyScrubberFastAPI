@@ -6,7 +6,6 @@ from db.settingsDB import SettingsDB
 app = FastAPI()
 
 
-app.include_router(db_routers.router)
 app.include_router(tag_routers.router)
 app.include_router(task_routers.router)
 app.include_router(log_routers.router)
