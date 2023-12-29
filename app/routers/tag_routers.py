@@ -1,4 +1,5 @@
 import os
+import shutil
 from fastapi import FastAPI, HTTPException, APIRouter, status, BackgroundTasks, Depends
 from fastapi.responses import JSONResponse
 from uuid import uuid4
@@ -15,7 +16,7 @@ from celery import current_app
 router = APIRouter(prefix='/tags', tags=['tags'])
 background_tasks = BackgroundTasks()
 
-
+tasks_collection = settingsDB.COLLECTION_TASKS
 tags_collection = settingsDB.COLLECTION_TAGS
 logs_collection = settingsDB.COLLECTION_LOGS
 
@@ -35,7 +36,7 @@ async def create_tag(tag: Tag, current_user: dict = Depends(decode_jwt_token)):
     '''
     try:
         created_tag = await tags_collection.insert_one(tag.dict())
-        inserted_id = created_tag.inserted_id 
+        inserted_id = tag.tag_id 
         tag_folder_path = f"neuro/{tag.neuro_id}/{inserted_id}"
         os.makedirs(tag_folder_path, exist_ok=True)
 
@@ -47,18 +48,18 @@ async def create_tag(tag: Tag, current_user: dict = Depends(decode_jwt_token)):
         return JSONResponse(content={"message": f"Failed to create tag. Error: {str(e)}"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @router.get("/tag-status/{tag_id}")
-async def get_tag_status(tag_id: str):
+async def get_tag_status(tag_id: str, current_user: dict = Depends(decode_jwt_token)):
     result = AsyncResult(tag_id, app=celery)
     task_status = result.state
     return {"task_id": tag_id, "status": task_status}
     
 @router.get("/in_process")
-async def get_tags_in_process():
+async def get_tags_in_process(current_user: dict = Depends(decode_jwt_token)):
     active_tasks = celery.control.inspect().active()
     return {active_tasks}
 
 @router.get("/progress/{tag_id}")
-async def get_progress(tag_id: str):
+async def get_progress(tag_id: str, current_user: dict = Depends(decode_jwt_token)):
     try:
         log_entry = logs_collection.find_one({"tag_id": tag_id})
 
@@ -112,27 +113,41 @@ async def get_tag(tag_id: str, current_user: dict = Depends(decode_jwt_token)):
 
 @router.delete("/{tag_id}")
 async def delete_tag(tag_id: str, current_user: dict = Depends(decode_jwt_token)):
-    '''
-    DELETE функция: Удаляет тег по его идентификатору.
-
-    Parameters:
-    - tag_id: Идентификатор тега, переданный в URL.
-
-    Returns:
-    JSONResponse с информацией об успешном удалении тега или сообщением об отсутствии тега.
-    - В случае успешного удаления: {"message": "Tag deleted successfully"} (статус 200 OK).
-    - В случае отсутствия тега: {"message": "Tag not found"} (статус 404 Not Found).
-    - В случае ошибки: Сообщение об ошибке (статус 500 Internal Server Error).
-
-    Описание:
-    Эта функция обрабатывает DELETE-запросы для удаления тега по его идентификатору. Поиск тега в базе данных осуществляется по заданному идентификатору. Если тег найден и успешно удален, возвращается JSONResponse с сообщением об успешном удалении. В случае, если тег не был найден, возвращается сообщение о его отсутствии. В случае ошибки также возвращается соответствующее сообщение.
-    '''
     try:
+        # Поиск логов связанных с тегом
+        logs = await logs_collection.find({"tag_id": tag_id}).to_list(length=None)
+
+        if not logs:
+            raise HTTPException(status_code=404, detail="Logs for tag not found")
+
+        # Удаляем связанные данные
+        for log in logs:
+            # Удаление папки
+            folder_path = log.get("path_to_project")
+            shutil.rmtree(folder_path)  # Удаление папки
+
+            # Удаление записи в MongoDB
+            log_id = log.get("id")
+            result = await logs_collection.delete_one({"id": log_id})
+
+            if result.deleted_count != 1:
+                raise HTTPException(status_code=500, detail="Error deleting log record")
+
+            # Удаление записи в коллекции задач по task_id
+            task_id = log.get("task_id")
+            if task_id:
+                await tasks_collection.delete_one({"task_id": task_id})
+
+        # Затем удаляем сам тег
         result = await tags_collection.delete_one({"tag_id": tag_id})
+
         if result.deleted_count == 1:
-            return JSONResponse(content={"message": "Tag deleted successfully"}, status_code=status.HTTP_200_OK)
+            return JSONResponse(content={"message": "Tag and related data deleted successfully"}, status_code=status.HTTP_200_OK)
         else:
             return JSONResponse(content={"message": "Tag not found"}, status_code=status.HTTP_404_NOT_FOUND)
+
+    except HTTPException as he:
+        raise he
     except Exception as e:
         return JSONResponse(content={"message": f"Error: {str(e)}"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

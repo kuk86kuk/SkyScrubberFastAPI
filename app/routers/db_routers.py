@@ -1,7 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from app.models.db_model import DataDB
 from app.utils.directory_utils import *
-
+from ..utils.auth_utils import decode_jwt_token
 
 
 router = APIRouter(prefix='/database', tags=['database'])
@@ -9,7 +9,7 @@ router = APIRouter(prefix='/database', tags=['database'])
 
 
 @router.get("/info")
-async def info_database():
+async def info_database(current_user: dict = Depends(decode_jwt_token)):
     '''
     GET функция: Возвращает информацию о базе данных.
     Returns: 
@@ -19,7 +19,7 @@ async def info_database():
 
 
 @router.get("/get")
-async def get_data_database(collection: DataDB):
+async def get_data_database(collection: DataDB, current_user: dict = Depends(decode_jwt_token)):
     '''
     GET функция: Возвращает строки из базы данных, в количестве, указанном параметром count.
     Args 
@@ -32,7 +32,7 @@ async def get_data_database(collection: DataDB):
         return {'count, должен быть числом'}
 
 @router.post("/post")
-async def post_data_database(collection: DataDB):
+async def post_data_database(collection: DataDB, current_user: dict = Depends(decode_jwt_token)):
     '''
     DELETE Функция: Удаляет строку из базы данных на основе указанной таблицы и идентификатора (ID).
     Args:
@@ -45,7 +45,7 @@ async def post_data_database(collection: DataDB):
     pass
 
 @router.put("/put")
-async def put_data_database(collection: DataDB):
+async def put_data_database(collection: DataDB, current_user: dict = Depends(decode_jwt_token)):
     '''
     PUT Функция: Обновляет строку в определенной таблице базы данных на основе указанного идентификатора (ID).
     Args:
@@ -58,7 +58,7 @@ async def put_data_database(collection: DataDB):
     pass
 
 @router.delete("/delete")
-async def delete_data_database(collection: DataDB):
+async def delete_data_database(collection: DataDB, current_user: dict = Depends(decode_jwt_token)):
     '''
     DELETE Функция: Удаляет строку в указанную таблицу базы данных.
     Args:
