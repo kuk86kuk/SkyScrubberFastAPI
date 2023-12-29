@@ -1,6 +1,7 @@
 import os
 import random
 import string
+import shutil
 
 from fastapi import FastAPI, HTTPException, APIRouter, status, Depends
 from fastapi.responses import JSONResponse
@@ -21,6 +22,7 @@ router = APIRouter(prefix='/tasks', tags=['tasks'])
 
 tasks_collection = settingsDB.COLLECTION_TASKS
 tags_collection = settingsDB.COLLECTION_TAGS
+logs_collection = settingsDB.COLLECTION_LOGS
 
 
 
@@ -95,27 +97,41 @@ async def get_task(task_id: str, current_user: dict = Depends(decode_jwt_token))
 
 @router.delete("/{task_id}")
 async def delete_task(task_id: str, current_user: dict = Depends(decode_jwt_token)):
-    '''
-    DELETE функция: Удаляет задачу по её идентификатору.
-
-    Parameters:
-    - task_id: Идентификатор задачи, переданный в URL.
-
-    Returns:
-    JSONResponse с информацией об успешном удалении задачи или сообщением об отсутствии задачи.
-    - В случае успешного удаления: {"message": "Task deleted successfully"} (статус 200 OK).
-    - В случае отсутствия задачи: {"message": "Task not found"} (статус 404 Not Found).
-    - В случае ошибки: Сообщение об ошибке (статус 500 Internal Server Error).
-
-    Описание:
-    Эта функция обрабатывает DELETE-запросы для удаления задачи по её идентификатору. Поиск задачи в базе данных осуществляется по заданному идентификатору. Если задача найдена и успешно удалена, возвращается JSONResponse с сообщением об успешном удалении. В случае, если задача не была найдена, возвращается сообщение о её отсутствии. В случае ошибки также возвращается соответствующее сообщение.
-    '''
     try:
+        # Поиск логов связанных с задачей
+        logs = await logs_collection.find({"task_id": task_id}).to_list(length=None)
+
+        if not logs:
+            raise HTTPException(status_code=404, detail="Logs for task not found")
+
+        # Удаляем связанные данные
+        for log in logs:
+            # Удаление папки
+            folder_path = log.get("path_to_project")
+            shutil.rmtree(folder_path)  # Удаление папки
+
+            # Удаление записи в MongoDB
+            log_id = log.get("id")
+            result = await logs_collection.delete_one({"id": log_id})
+
+            if result.deleted_count != 1:
+                raise HTTPException(status_code=500, detail="Error deleting log record")
+
+            # Удаление записи в коллекции тегов по tag_id
+            tag_id = log.get("tag_id")
+            if tag_id:
+                await tags_collection.delete_one({"tag_id": tag_id})
+
+        # Затем удаляем саму задачу
         result = await tasks_collection.delete_one({"task_id": task_id})
+
         if result.deleted_count == 1:
-            return JSONResponse(content={"message": "Task deleted successfully"}, status_code=status.HTTP_200_OK)
+            return JSONResponse(content={"message": "Task and related data deleted successfully"}, status_code=status.HTTP_200_OK)
         else:
             return JSONResponse(content={"message": "Task not found"}, status_code=status.HTTP_404_NOT_FOUND)
+
+    except HTTPException as he:
+        raise he
     except Exception as e:
         return JSONResponse(content={"message": f"Error: {str(e)}"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
